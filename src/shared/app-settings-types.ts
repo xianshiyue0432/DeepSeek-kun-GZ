@@ -1,5 +1,6 @@
 import type { GuiUpdateChannel } from './gui-update'
 import type { KeyboardShortcutsConfigV1 } from './keyboard-shortcuts'
+import type { LocalWhisperDownloadSourceId } from './local-whisper'
 import type { ApprovalPolicy, SandboxMode } from '../../kun/src/contracts/policy.js'
 import type { ComputerUseMode } from '../../kun/src/contracts/capabilities.js'
 import type { ModelEndpointFormat } from '../../kun/src/contracts/model-endpoint-format.js'
@@ -38,7 +39,7 @@ export const IMAGE_GENERATION_PROTOCOLS = ['openai-images', 'minimax-image'] as 
 export type ImageGenerationProtocol = (typeof IMAGE_GENERATION_PROTOCOLS)[number]
 export const DEFAULT_IMAGE_GENERATION_PROTOCOL: ImageGenerationProtocol = 'openai-images'
 export const CUSTOM_SPEECH_TO_TEXT_PROVIDER_ID = 'custom'
-export const SPEECH_TO_TEXT_PROTOCOLS = ['openai-transcriptions', 'mimo-asr'] as const
+export const SPEECH_TO_TEXT_PROTOCOLS = ['openai-transcriptions', 'mimo-asr', 'local-whisper'] as const
 export type SpeechToTextProtocol = (typeof SPEECH_TO_TEXT_PROTOCOLS)[number]
 export const DEFAULT_SPEECH_TO_TEXT_PROTOCOL: SpeechToTextProtocol = 'openai-transcriptions'
 export const CUSTOM_TEXT_TO_SPEECH_PROVIDER_ID = 'custom'
@@ -291,6 +292,8 @@ export type KunSpeechToTextSettingsV1 = {
   /** Custom speech API key override. Empty inherits the selected provider API key when providerId is set. */
   apiKey: string
   model: string
+  /** Download source used when protocol is local-whisper. */
+  localWhisperDownloadSource: LocalWhisperDownloadSourceId
   /** Language hint sent to the provider ("zh", "en", ...). Empty means auto-detect. */
   language: string
   timeoutMs: number

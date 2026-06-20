@@ -125,6 +125,13 @@ module.exports = {
     // the WeChat bridge imports @tencent-weixin/openclaw-weixin/dist at
     // runtime to send media, and that chain resolves openclaw/plugin-sdk/*.
   ],
+  extraResources: [
+    {
+      from: 'resources/whisper',
+      to: 'whisper',
+      filter: ['**/*']
+    }
+  ],
   artifactName: `Kun-${artifactVersion}-\${os}-\${arch}.\${ext}`,
   publish: [
     {
@@ -132,6 +139,7 @@ module.exports = {
       url: genericUpdateUrl
     }
   ],
+  beforePack: './scripts/before-pack.cjs',
   afterPack: './scripts/after-pack.cjs',
   afterSign: './scripts/mac-notarize.cjs',
   mac: {

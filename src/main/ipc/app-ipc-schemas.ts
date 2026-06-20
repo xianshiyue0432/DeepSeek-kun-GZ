@@ -50,6 +50,8 @@ import { KEYBOARD_SHORTCUT_COMMANDS } from '../../shared/keyboard-shortcuts'
 import { WRITE_EXPORT_FORMATS } from '../../shared/write-export'
 import { WRITE_INFOGRAPHIC_MAX_TEXT_CHARS } from '../../shared/write-infographic'
 import { SPEECH_TRANSCRIPTION_MAX_BASE64_CHARS, SPEECH_TRANSCRIPTION_MAX_DURATION_MS } from '../../shared/speech-to-text'
+import { LOCAL_WHISPER_DOWNLOAD_SOURCES, LOCAL_WHISPER_MODELS } from '../../shared/local-whisper'
+import type { LocalWhisperDownloadSourceId } from '../../shared/local-whisper'
 import {
   TERMINAL_DEFAULT_COLS,
   TERMINAL_DEFAULT_ROWS,
@@ -220,6 +222,14 @@ const writeInlineCompletionModelSchema = z.union([
 const modelEndpointFormatSchema = z.enum(MODEL_ENDPOINT_FORMATS)
 const imageGenerationProtocolSchema = z.enum(IMAGE_GENERATION_PROTOCOLS)
 const speechToTextProtocolSchema = z.enum(SPEECH_TO_TEXT_PROTOCOLS)
+const localWhisperModelIdSchema = z.enum(LOCAL_WHISPER_MODELS.map((model) => model.id) as [string, ...string[]])
+const localWhisperDownloadSourceIds = LOCAL_WHISPER_DOWNLOAD_SOURCES.map((source) => source.id) as [
+  LocalWhisperDownloadSourceId,
+  ...LocalWhisperDownloadSourceId[]
+]
+const localWhisperDownloadSourceSchema = z.enum(
+  localWhisperDownloadSourceIds
+)
 const textToSpeechProtocolSchema = z.enum(TEXT_TO_SPEECH_PROTOCOLS)
 const musicGenerationProtocolSchema = z.enum(MUSIC_GENERATION_PROTOCOLS)
 const videoGenerationProtocolSchema = z.enum(VIDEO_GENERATION_PROTOCOLS)
@@ -230,6 +240,7 @@ const speechToTextSettingsSchema = z.object({
   baseUrl: z.string().trim().max(MAX_URL_LENGTH),
   apiKey: z.string().max(MAX_BODY_BYTES),
   model: z.string().trim().max(128),
+  localWhisperDownloadSource: localWhisperDownloadSourceSchema,
   language: z.string().trim().max(16),
   timeoutMs: z.number().int().positive().max(600_000)
 }).strict()
@@ -388,6 +399,7 @@ const kunRuntimePatchSchema = z.object({
     baseUrl: z.string().trim().max(MAX_URL_LENGTH).optional(),
     apiKey: z.string().max(MAX_BODY_BYTES).optional(),
     model: z.string().trim().max(128).optional(),
+    localWhisperDownloadSource: localWhisperDownloadSourceSchema.optional(),
     language: z.string().trim().max(16).optional(),
     timeoutMs: z.number().int().positive().max(600_000).optional()
   }).strict().optional(),
@@ -1575,6 +1587,19 @@ export const speechTranscribePayloadSchema = z
     mimeType: trimmedString(64),
     durationMs: z.number().int().positive().max(SPEECH_TRANSCRIPTION_MAX_DURATION_MS).optional(),
     speechToText: speechToTextSettingsSchema.optional()
+  })
+  .strict()
+
+export const localWhisperModelIdPayloadSchema = localWhisperModelIdSchema.optional()
+export const localWhisperDownloadPayloadSchema = z
+  .object({
+    modelId: localWhisperModelIdSchema.optional(),
+    sourceId: localWhisperDownloadSourceSchema.optional()
+  })
+  .strict()
+export const localWhisperSourceStatusPayloadSchema = z
+  .object({
+    modelId: localWhisperModelIdSchema.optional()
   })
   .strict()
 

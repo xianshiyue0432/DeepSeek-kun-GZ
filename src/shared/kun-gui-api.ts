@@ -74,6 +74,15 @@ import type {
   SpeechTranscriptionResult
 } from './speech-to-text'
 import type {
+  LocalWhisperModelDeleteResult,
+  LocalWhisperDownloadSourceId,
+  LocalWhisperDownloadSourceStatusResult,
+  LocalWhisperModelDownloadResult,
+  LocalWhisperModelId,
+  LocalWhisperModelProgress,
+  LocalWhisperModelStatus
+} from './local-whisper'
+import type {
   UiPluginListItem,
   UiPluginManifestV1,
   UiPluginRuntimeFigures
@@ -424,6 +433,17 @@ export type KunGuiApi = {
   transcribeSpeech: (
     payload: SpeechTranscriptionRequest
   ) => Promise<SpeechTranscriptionResult>
+  getLocalWhisperModelStatus: (modelId?: LocalWhisperModelId) => Promise<LocalWhisperModelStatus>
+  downloadLocalWhisperModel: (payload?: {
+    modelId?: LocalWhisperModelId
+    sourceId?: LocalWhisperDownloadSourceId
+  }) => Promise<LocalWhisperModelDownloadResult>
+  cancelLocalWhisperModel: (modelId?: LocalWhisperModelId) => Promise<LocalWhisperModelDownloadResult>
+  checkLocalWhisperDownloadSources: (payload?: {
+    modelId?: LocalWhisperModelId
+  }) => Promise<LocalWhisperDownloadSourceStatusResult>
+  deleteLocalWhisperModel: (modelId?: LocalWhisperModelId) => Promise<LocalWhisperModelDeleteResult>
+  onLocalWhisperModelProgress: (handler: (payload: LocalWhisperModelProgress) => void) => () => void
   listWriteInlineCompletionDebugEntries: () => Promise<WriteInlineCompletionDebugEntry[]>
   clearWriteInlineCompletionDebugEntries: () => Promise<boolean>
   exportWriteDocument: (payload: WriteExportPayload) => Promise<WriteExportResult>

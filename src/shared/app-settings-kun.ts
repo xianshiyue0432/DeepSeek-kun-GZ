@@ -51,6 +51,10 @@ import {
   normalizeModelProviderSettings,
   resolveKunRuntimeSettings
 } from './app-settings-provider'
+import {
+  LOCAL_WHISPER_DEFAULT_DOWNLOAD_SOURCE_ID,
+  isLocalWhisperDownloadSourceId
+} from './local-whisper'
 
 const LEGACY_COREAGENT_DATA_DIR = '~/.deepseekgui/coreagent'
 const LEGACY_KUN_DEFAULT_MODEL = 'deepseek-chat'
@@ -187,6 +191,7 @@ export function defaultKunSpeechToTextSettings(): KunSpeechToTextSettingsV1 {
     baseUrl: '',
     apiKey: '',
     model: '',
+    localWhisperDownloadSource: LOCAL_WHISPER_DEFAULT_DOWNLOAD_SOURCE_ID,
     language: '',
     timeoutMs: 60_000
   }
@@ -476,12 +481,16 @@ function normalizeKunSpeechToTextSettings(
     baseUrl: typeof input?.baseUrl === 'string' ? input.baseUrl.trim() : defaults.baseUrl,
     apiKey: typeof input?.apiKey === 'string' ? input.apiKey.trim() : defaults.apiKey,
     model: typeof input?.model === 'string' ? input.model.trim() : defaults.model,
+    localWhisperDownloadSource: isLocalWhisperDownloadSourceId(input?.localWhisperDownloadSource)
+      ? input.localWhisperDownloadSource
+      : defaults.localWhisperDownloadSource,
     language: typeof input?.language === 'string' ? input.language.trim().toLowerCase().slice(0, 16) : defaults.language,
     timeoutMs: boundedPositiveInt(input?.timeoutMs, defaults.timeoutMs, 600_000)
   }
 }
 
 function normalizeKunSpeechToTextProtocol(value: unknown): SpeechToTextProtocol {
+  if (value === 'local-whisper') return 'local-whisper'
   return value === 'mimo-asr' ? 'mimo-asr' : DEFAULT_SPEECH_TO_TEXT_PROTOCOL
 }
 

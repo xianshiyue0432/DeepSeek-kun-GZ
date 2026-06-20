@@ -891,6 +891,7 @@ describe('model provider settings', () => {
         kun: {
           ...defaultKunRuntimeSettings(),
           speechToText: {
+            ...defaultKunRuntimeSettings().speechToText,
             enabled: true,
             providerId: '',
             protocol: 'openai-transcriptions',
