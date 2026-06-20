@@ -45,7 +45,8 @@ describe('local-whisper-service helpers', () => {
     const runners = [
       ['darwin-arm64', 'whisper-cli'],
       ['win32-x64', 'whisper-cli.exe'],
-      ['linux-x64', 'whisper-cli']
+      ['linux-x64', 'whisper-cli'],
+      ['linux-arm64', 'whisper-cli']
     ] as const
 
     for (const [platformDir, executable] of runners) {

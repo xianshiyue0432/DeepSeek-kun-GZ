@@ -47,6 +47,8 @@ let activeDownload: {
 type RunnerCommand = {
   command: string
   argsPrefix: string[]
+  cwd?: string
+  env?: NodeJS.ProcessEnv
 }
 
 export function setLocalWhisperProgressEmitter(
@@ -174,7 +176,7 @@ export async function transcribeViaLocalWhisper(
       '-nt',
       ...languageArgs
     ]
-    await runWhisper(runner.command, args, speechToText.timeoutMs)
+    await runWhisper(runner.command, args, speechToText.timeoutMs, runner)
     const text = (await readFile(outputPath, 'utf8')).trim()
     if (!text) throw new Error(WHISPER_OUTPUT_EMPTY_MESSAGE)
     return text
@@ -452,9 +454,26 @@ async function resolveWhisperRunner(): Promise<RunnerCommand> {
     join(process.cwd(), 'resources', 'whisper', platformDir, executable)
   ].filter(Boolean)
   for (const candidate of candidates) {
-    if (await canExecute(candidate)) return { command: candidate, argsPrefix: [] }
+    if (await canExecute(candidate)) {
+      const runnerDir = dirname(candidate)
+      return {
+        command: candidate,
+        argsPrefix: [],
+        cwd: runnerDir,
+        env: localWhisperRunnerEnv(runnerDir)
+      }
+    }
   }
   return { command: executable, argsPrefix: [] }
+}
+
+function localWhisperRunnerEnv(runnerDir: string): NodeJS.ProcessEnv {
+  if (process.platform !== 'linux') return process.env
+  const existing = process.env.LD_LIBRARY_PATH
+  return {
+    ...process.env,
+    LD_LIBRARY_PATH: existing ? `${runnerDir}:${existing}` : runnerDir
+  }
 }
 
 async function canExecute(path: string): Promise<boolean> {
@@ -477,9 +496,14 @@ function whisperLanguageArgs(language: string): string[] {
   return ['-l', value]
 }
 
-async function runWhisper(command: string, args: string[], timeoutMs: number): Promise<void> {
+async function runWhisper(
+  command: string,
+  args: string[],
+  timeoutMs: number,
+  runner: Pick<RunnerCommand, 'cwd' | 'env'> = {}
+): Promise<void> {
   await new Promise<void>((resolve, reject) => {
-    const child = spawn(command, args, { windowsHide: true })
+    const child = spawn(command, args, { cwd: runner.cwd, env: runner.env, windowsHide: true })
     let stderr = ''
     let stdout = ''
     const timer = setTimeout(() => {
